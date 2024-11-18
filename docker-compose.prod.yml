@@ -37,4 +37,10 @@ services:
       - REFRESH_TOKEN=${REFRESH_TOKEN}
       - ROLE_TOKEN=${ROLE_TOKEN}
     command: >
-      sh -c "npx typeorm migration:run -d dist/data-source.js && npm run start:prod"
+      sh -c "npx typeorm migration:run -d dist/data-source.js && 
+      node --max-old-space-size=4096 dist/main" # Adjust the heap size here
+    deploy:
+      resources:
+        limits:
+          memory: 512M # Set memory limit
+          cpus: '0.5'  # Set CPU limit
