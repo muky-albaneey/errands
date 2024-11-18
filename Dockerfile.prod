@@ -34,26 +34,21 @@ FROM node:20.15.0
 # Create and change to the app directory
 WORKDIR /usr/src/app
 
-# Copy application dependency manifests to the container image
-COPY package*.json ./
+# Copy only essential files
+COPY package*.json tsconfig.json ./
+COPY src ./src
 
-# Install all dependencies
+# Install dependencies
 RUN npm install
-
-# Copy local code to the container image
-COPY . .
 
 # Build the application
 RUN npm run build
 
-# Prune dev dependencies
-RUN npm prune --production
+# Copy compiled files to runtime image
+RUN cp -r dist /usr/src/app/dist
 
-# Remove unnecessary source files
-RUN rm -rf ./src ./node_modules/.cache
-
-# Document that the service listens on port 3001
+# Expose port
 EXPOSE 3001
 
-# Increase Node.js heap size and run the application
-CMD ["node", "--max-old-space-size=512", "dist/main.js"]
+# Start the app
+CMD ["node", "--max-old-space-size=4096", "dist/main"]
