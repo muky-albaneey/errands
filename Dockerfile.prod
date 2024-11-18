@@ -28,7 +28,7 @@
 
 # # Run the web service on container startup
 # CMD ["npm", "run", "start:prod"]
-# Stage 1: Build
+# Build stage
 FROM node:20.15.0 AS build
 
 WORKDIR /usr/src/app
@@ -39,7 +39,7 @@ COPY src ./src
 RUN npm install
 RUN npm run build
 
-# Stage 2: Runtime
+# Runtime stage
 FROM node:20.15.0 AS runtime
 
 WORKDIR /usr/src/app
@@ -51,4 +51,7 @@ RUN npm install --only=production
 
 EXPOSE 3001
 
-CMD ["node", "--max-old-space-size=8192", "dist/main"]
+# Use PM2 for better memory management and process handling
+RUN npm install pm2 -g
+
+CMD ["pm2-runtime", "dist/main"]
