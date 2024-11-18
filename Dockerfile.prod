@@ -29,29 +29,25 @@
 # # Run the web service on container startup
 # CMD ["npm", "run", "start:prod"]
 # Build stage
-FROM node:20.15.0 AS build
+FROM node:20.15.0
 
+# Create and change to the app directory
 WORKDIR /usr/src/app
 
-COPY package*.json tsconfig.json ./
-COPY src ./src
-
-RUN npm install
-RUN npm run build
-
-# Runtime stage
-FROM node:20.15.0 AS runtime
-
-WORKDIR /usr/src/app
-
-COPY --from=build /usr/src/app/dist /usr/src/app/dist
+# Copy application dependency manifests to the container image
 COPY package*.json ./
 
-RUN npm install --only=production
+# Install dependencies
+RUN npm install
 
-EXPOSE 3001
+# Install Nest CLI globally (if required)
+RUN npm install -g @nestjs/cli
 
-# Use PM2 for better memory management and process handling
-RUN npm install pm2 -g
+# Copy local code to the container image
+COPY . .
 
-CMD ["pm2-runtime", "dist/main"]
+# Expose the port
+EXPOSE 3000
+
+# Run the web service on container startup
+CMD ["npm", "run", "start:dev"]
