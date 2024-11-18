@@ -42,5 +42,5 @@ services:
     deploy:
       resources:
         limits:
-          memory: 3G # Set memory limit
-          cpus: '1.0'  # Set CPU limit
+          memory: 8G # Set memory limit
+          cpus: '3.0'  # Set CPU limit

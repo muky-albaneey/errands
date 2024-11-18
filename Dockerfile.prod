@@ -28,27 +28,27 @@
 
 # # Run the web service on container startup
 # CMD ["npm", "run", "start:prod"]
-# Use the specified Node.js version as the base image
-FROM node:20.15.0
+# Stage 1: Build
+FROM node:20.15.0 AS build
 
-# Create and change to the app directory
 WORKDIR /usr/src/app
 
-# Copy only essential files
 COPY package*.json tsconfig.json ./
 COPY src ./src
 
-# Install dependencies
 RUN npm install
-
-# Build the application
 RUN npm run build
 
-# Copy compiled files to runtime image
-RUN cp -r dist /usr/src/app/dist
+# Stage 2: Runtime
+FROM node:20.15.0 AS runtime
 
-# Expose port
+WORKDIR /usr/src/app
+
+COPY --from=build /usr/src/app/dist /usr/src/app/dist
+COPY package*.json ./
+
+RUN npm install --only=production
+
 EXPOSE 3001
 
-# Start the app
-CMD ["node", "--max-old-space-size=4096", "dist/main"]
+CMD ["node", "--max-old-space-size=8192", "dist/main"]
